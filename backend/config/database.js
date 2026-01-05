@@ -37,9 +37,13 @@ const getConnection = async () => {
 
 const saveDatabase = () => {
     if (db) {
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        fs.writeFileSync(dbPath, buffer);
+        try {
+            const data = db.export();
+            const buffer = Buffer.from(data);
+            fs.writeFileSync(dbPath, buffer);
+        } catch (err) {
+            console.error('Failed to save database:', err);
+        }
     }
 };
 

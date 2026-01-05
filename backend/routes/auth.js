@@ -50,13 +50,18 @@ router.post('/login', async (req, res) => {
                 username: user.Username, 
                 role: user.Role 
             },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN }
+            process.env.JWT_SECRET || 'default-secret-key-123',
+            { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
         );
 
         // Update LastLogin
-        await db.run('UPDATE Users SET LastLogin = CURRENT_TIMESTAMP WHERE UserID = ?', [user.UserID]);
-        saveDatabase();
+        try {
+            await db.run('UPDATE Users SET LastLogin = CURRENT_TIMESTAMP WHERE UserID = ?', [user.UserID]);
+            saveDatabase();
+        } catch (dbError) {
+            console.error('Database update error:', dbError);
+            // Continue login even if DB update fails
+        }
 
         res.json({
             success: true,
